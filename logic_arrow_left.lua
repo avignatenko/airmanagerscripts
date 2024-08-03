@@ -1,5 +1,5 @@
---cansim_init("ARDUINO_NANO_O")
-cansim_init("ARDUINO_NANO_P")
+cansim_init("ARDUINO_NANO_O")
+--cansim_init("ARDUINO_NANO_P")
 
 
 function airspeed(ids, value)
@@ -363,40 +363,6 @@ xpl_dataref_subscribe(
 cansim_register_instrument(30, function(port, payload)
   print("Something! with " .. port .. "payload " .. payload)
 end)
--- buttons
-
-cansim_register_instrument(24, function(port, payload)
-  print("Something! with " .. port .. "payload " .. payload)
-  if port == 7 then 
-     xpl_dataref_write("sim/cockpit/electrical/battery_on", "INT", payload)
-     fs2020_event("MASTER_BATTERY_SET", payload)
-  end
-  if port == 6 then 
-     xpl_dataref_write("sim/cockpit/electrical/generator_on", "INT[8]", {payload})
-     fs2020_event("ALTERNATOR_SET", payload)
-  end
-  if port == 5 then 
-     xpl_dataref_write("simcoders/rep/engine/electrical_fuelpump/switch_on_0", "INT", payload)
-     fs2020_event("FUELSYSTEM_PUMP_SET", payload)
-  end -- fuel pump
-  if port == 4 then 
-     xpl_dataref_write("sim/cockpit/electrical/landing_lights_on", "INT", payload) 
-     fs2020_event("LANDING_LIGHTS_SET", payload)  
-  end -- landing
-  if port == 2 then 
-     xpl_dataref_write("sim/cockpit/electrical/beacon_lights_on", "INT", payload) 
-     fs2020_event("BEACON_LIGHTS_SET", payload)
-  end -- beacm
-  if port == 1 then 
-     xpl_dataref_write("sim/cockpit/electrical/strobe_lights_on", "INT", payload) 
-     fs2020_event("STROBES_SET", payload)
-  end -- collision
-  if port == 0 then 
-     xpl_dataref_write("sim/cockpit/switches/pitot_heat_on", "INT", payload) 
-     fs2020_event("PITOT_HEAT_SET", payload)
-  end -- pitot
-end)
-
 
 -- indicators
 xpl_dataref_subscribe("sim/cockpit2/electrical/generator_amps", "FLOAT[8]", function(value)
@@ -556,6 +522,5 @@ connection_timer_id = timer_start(0, 500, connection_timer_callback)
 
 
 -- statistics
-cansim_send_byte(2, 0, 0)
-
-cansim_send_byte(30, 0, 0)
+--cansim_send_byte(2, 0, 0)
+--cansim_send_byte(30, 0, 0)
