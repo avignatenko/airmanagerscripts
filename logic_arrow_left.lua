@@ -1,3 +1,8 @@
+is_rep_prop = user_prop_add_boolean("Is REP?", false, "Is REP aircraft?")
+
+local is_rep = user_prop_get(is_rep_prop)
+print("REP settings: " .. tostring(is_rep))
+
 cansim_init("ARDUINO_NANO_O")
 --cansim_init("ARDUINO_NANO_P")
 
@@ -64,8 +69,11 @@ fs2020_variable_subscribe(
     end
 )
  
+local kts_dataref_rep =  "simcoders/rep/cockpit2/gauges/indicators/airspeed_kts_pilot";
+local kts_dataref = "sim/cockpit2/gauges/indicators/airspeed_kts_pilot"
+
 xpl_dataref_subscribe(
-    "simcoders/rep/cockpit2/gauges/indicators/airspeed_kts_pilot",
+    is_rep and kts_dataref_rep or kts_dataref,
     "FLOAT",
     function(value)
         airspeed(16, value)
@@ -114,9 +122,10 @@ fs2020_variable_subscribe(
     end
 )
 
-
+local alt_dataref_rep = "simcoders/rep/cockpit2/gauges/indicators/altitude_ft_pilot"
+local alt_dataref = "sim/cockpit2/gauges/indicators/altitude_ft_pilot"
 xpl_dataref_subscribe(
-    "simcoders/rep/cockpit2/gauges/indicators/altitude_ft_pilot",
+    is_rep and alt_dataref_rep or alt_dataref,
     "FLOAT",
     function(value)
         altimeter(17, -value) --fixme: update instrument to set positive values
@@ -140,8 +149,11 @@ fs2020_variable_subscribe(
     end
 )
 
+local vvi_fpm_dataref_rep = "simcoders/rep/cockpit2/gauges/indicators/vvi_fpm_pilot"
+local vvi_fpm_dataref = "sim/cockpit2/gauges/indicators/vvi_fpm_pilot"
+
 xpl_dataref_subscribe(
-    "simcoders/rep/cockpit2/gauges/indicators/vvi_fpm_pilot",
+    is_rep and vvi_fpm_dataref_rep or vvi_fpm_dataref,
     "FLOAT",
     function(value)
         vertical_rate(18, value / 100)
@@ -211,13 +223,27 @@ cansim_register_instrument(
     end
 )
 
-xpl_dataref_subscribe(
-    "simcoders/rep/cockpit2/gauges/indicators/engine_0_rpm",
-    "FLOAT",
-    function(value)
-        rpm(21, value)
-    end
-)
+
+if is_rep then
+    xpl_dataref_subscribe(
+        "simcoders/rep/cockpit2/gauges/indicators/engine_0_rpm",
+        "FLOAT",
+        function(value)
+            rpm(21, value)
+        end
+    )
+else
+
+    xpl_dataref_subscribe(
+        "sim/cockpit2/engine/indicators/engine_speed_rpm",
+        "FLOAT[2]",
+        function(value)
+            rpm(21, value[1])
+        end
+    )
+end
+
+
 
 fs2020_variable_subscribe("GENERAL ENG RPM:1", "Rpm", 
     function(value)
@@ -225,13 +251,24 @@ fs2020_variable_subscribe("GENERAL ENG RPM:1", "Rpm",
     end
 )
         
-xpl_dataref_subscribe(
-    "simcoders/rep/indicators/fuel/fuel_flow_0",
-    "FLOAT",
-    function(value)
-        fuel_flow(22, value * 1350)
-    end
-)
+if is_rep then
+    xpl_dataref_subscribe(
+        "simcoders/rep/indicators/fuel/fuel_flow_0",
+        "FLOAT",
+        function(value)
+            fuel_flow(22, value * 1350)
+        end
+    )
+else
+   xpl_dataref_subscribe(
+        "sim/cockpit2/engine/indicators/fuel_flow_kg_sec",
+        "FLOAT[2]",
+        function(value)
+            fuel_flow(22, value[1] * 951)
+        end
+    )
+end
+
 
 fs2020_variable_subscribe("ENG FUEL FLOW GPH:1", "Gallons per hour", 
     function(value)
@@ -369,13 +406,28 @@ xpl_dataref_subscribe("sim/cockpit2/electrical/generator_amps", "FLOAT[8]", func
    cansim_send_cached_float(27, 0, value[1], 0.1)
 end)
 
-xpl_dataref_subscribe("simcoders/rep/engine/oil/temp_f_0", "FLOAT", function(value)
-   cansim_send_cached_float(27, 1, value, 0.1)
-end)
 
-xpl_dataref_subscribe("simcoders/rep/engine/oil/press_psi_0", "FLOAT", function(value)
-   cansim_send_cached_float(27, 2, value, 0.1)
-end)
+
+if is_rep then
+    xpl_dataref_subscribe("simcoders/rep/engine/oil/temp_f_0", "FLOAT", function(value)
+       cansim_send_cached_float(27, 1, value, 0.1)
+    end)
+else
+     xpl_dataref_subscribe("sim/cockpit2/engine/indicators/oil_temperature_deg_C", "FLOAT[2]", function(value)
+       cansim_send_cached_float(27, 1, value[1], 0.1)
+    end)
+end
+
+
+if is_rep then
+    xpl_dataref_subscribe("simcoders/rep/engine/oil/press_psi_0", "FLOAT", function(value)
+       cansim_send_cached_float(27, 2, value, 0.1)
+    end)
+else
+    xpl_dataref_subscribe("sim/cockpit2/engine/indicators/oil_pressure_psi", "FLOAT[2]", function(value)
+       cansim_send_cached_float(27, 2, value[1], 0.1)
+    end)
+end
 
 xpl_dataref_subscribe("sim/cockpit2/temperature/outside_air_temp_degc", "FLOAT", function(value)
    cansim_send_cached_float(27, 3, value, 0.1)
@@ -518,7 +570,6 @@ function connection_timer_callback(count, max)
 end
 
 connection_timer_id = timer_start(0, 500, connection_timer_callback)
-
 
 
 -- statistics
