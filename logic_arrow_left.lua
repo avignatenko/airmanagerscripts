@@ -87,7 +87,6 @@ end)
 xpl_dataref_subscribe(is_rep and "simcoders/rep/cockpit2/gauges/indicators/engine_0_rpm" or
                           "sim/cockpit2/engine/indicators/engine_speed_rpm", is_rep and "FLOAT" or "FLOAT[2]",
     function(value)
-        print("rpm: " .. value[1])
         cansim_send_cached_float(21, 0, is_rep and value or value[1], 0.1)
     end)
 
