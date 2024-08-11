@@ -21,11 +21,11 @@ end)
 -- turn & roll --
 
 xpl_dataref_subscribe("sim/cockpit2/gauges/indicators/slip_deg", "FLOAT", function(value)
-    cansim_send_cached_float(ids, 19, -value * 3, 0.01)
+    cansim_send_cached_float(19, 1, -value * 3, 0.01)
 end)
 
 xpl_dataref_subscribe("sim/cockpit2/gauges/indicators/turn_rate_roll_deg_pilot", "FLOAT", function(value)
-    cansim_send_cached_float(19, 0, value_roll, 0.05)
+    cansim_send_cached_float(19, 0, value, 0.05)
 end)
 
 -- altitude --
@@ -87,6 +87,7 @@ end)
 xpl_dataref_subscribe(is_rep and "simcoders/rep/cockpit2/gauges/indicators/engine_0_rpm" or
                           "sim/cockpit2/engine/indicators/engine_speed_rpm", is_rep and "FLOAT" or "FLOAT[2]",
     function(value)
+        print("rpm: " .. value[1])
         cansim_send_cached_float(21, 0, is_rep and value or value[1], 0.1)
     end)
 
@@ -215,12 +216,14 @@ xpl_dataref_subscribe("sim/cockpit2/temperature/outside_air_temp_degc", "FLOAT",
     cansim_send_cached_float(27, 3, value, 0.1)
 end)
 
-xpl_dataref_subscribe("simcoders/rep/indicators/fuel/fuel_quantity_ratio_0", "FLOAT", function(ratio)
-    cansim_send_cached_float(25, 2, ratio * 40, 0.1)
+xpl_dataref_subscribe(is_rep and "simcoders/rep/indicators/fuel/fuel_quantity_ratio_0" or
+                          "sim/cockpit2/fuel/fuel_quantity", is_rep and "FLOAT" or "FLOAT[2]", function(ratio)
+    cansim_send_cached_float(25, 2, is_rep and (ratio * 40) or (ratio[1] * 0.33), 0.1)
 end)
 
-xpl_dataref_subscribe("simcoders/rep/indicators/fuel/fuel_quantity_ratio_1", "FLOAT", function(ratio)
-    cansim_send_cached_float(25, 0, ratio * 40, 0.1)
+xpl_dataref_subscribe(is_rep and "simcoders/rep/indicators/fuel/fuel_quantity_ratio_1" or
+                          "sim/cockpit2/fuel/fuel_quantity", is_rep and "FLOAT" or "FLOAT[2]", function(ratio)
+    cansim_send_cached_float(25, 0, is_rep and (ratio * 40) or (ratio[2] * 0.33), 0.1)
 end)
 
 xpl_dataref_subscribe("sim/cockpit2/engine/indicators/fuel_pressure_psi", "FLOAT[2]", function(pressure)
