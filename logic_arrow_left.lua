@@ -217,12 +217,12 @@ end)
 
 xpl_dataref_subscribe(is_rep and "simcoders/rep/indicators/fuel/fuel_quantity_ratio_0" or
                           "sim/cockpit2/fuel/fuel_quantity", is_rep and "FLOAT" or "FLOAT[2]", function(ratio)
-    cansim_send_cached_float(25, 2, is_rep and (ratio * 40) or (ratio[1] * 0.33), 0.1)
+    cansim_send_cached_float(25, 2, is_rep and (ratio * 40) or (ratio[1] * 0.4), 0.1)
 end)
 
 xpl_dataref_subscribe(is_rep and "simcoders/rep/indicators/fuel/fuel_quantity_ratio_1" or
                           "sim/cockpit2/fuel/fuel_quantity", is_rep and "FLOAT" or "FLOAT[2]", function(ratio)
-    cansim_send_cached_float(25, 0, is_rep and (ratio * 40) or (ratio[2] * 0.33), 0.1)
+    cansim_send_cached_float(25, 0, is_rep and (ratio * 40) or (ratio[2] * 0.4), 0.1)
 end)
 
 xpl_dataref_subscribe("sim/cockpit2/engine/indicators/fuel_pressure_psi", "FLOAT[2]", function(pressure)
